@@ -180,6 +180,10 @@ def match(text, pattern):
 ```
 
 > 这个我是能实现的，但是确实没有这么简洁。
+>
+> 我一开始是想用DP的思维来解决，但是代码确实没什么美感。~~别找借口了，就是你菜~~
+>
+> 关于所谓的相等，pattern[i] in {text[j],'.'}这个形式确实是非常的优秀。
 
 If a star is present in the pattern, it will be in the second position \text{pattern[1]}pattern[1]. Then, we may ignore this part of the pattern, or delete a matching character in the text. If we have a match on the remaining strings after any of these operations, then the initial inputs matched.
 
@@ -201,3 +205,59 @@ class Solution(object):
 > 如果说不带星号的solution我能说“学到了”，那么这个真的只能说叹为观止，自己的功夫还没练到家，原来还可以这么写。
 >
 > 之前满脑子都是循环的解决方案，没想到迭代竟能如此的简单高效。
+
+#### Approach 2: Dynamic Programming
+
+**Intuition**
+
+As the problem has an **optimal substructure**, it is natural to cache intermediate results. We ask the question \text{dp(i, j)}dp(i, j): does \text{text[i:]}text[i:] and \text{pattern[j:]}pattern[j:] match? We can describe our answer in terms of answers to questions involving smaller strings.
+
+**Algorithm**
+
+We proceed with the same recursion as in [Approach 1](https://leetcode.com/problems/regular-expression-matching/solution/#approach-1-recursion), except because calls will only ever be made to `match(text[i:], pattern[j:])`, we use \text{dp(i, j)}dp(i, j) to handle those calls instead, saving us expensive string-building operations and allowing us to cache the intermediate results.
+
+*Top-Down Variation*
+
+```python
+class Solution(object):
+    def isMatch(self, text, pattern):
+        memo = {}
+        def dp(i, j):
+            if (i, j) not in memo:
+                if j == len(pattern):
+                    ans = i == len(text)
+                else:
+                    first_match = i < len(text) and pattern[j] in {text[i], '.'}
+                    if j+1 < len(pattern) and pattern[j+1] == '*':
+                        ans = dp(i, j+2) or first_match and dp(i+1, j)
+                    else:
+                        ans = first_match and dp(i+1, j+1)
+
+                memo[i, j] = ans
+            return memo[i, j]
+
+        return dp(0, 0)
+```
+
+> 关于 `.*`问题，在`ans = dp(i, j+2) or first_match and dp(i+1, j)`中由于如果dp(i,j+2)为True的话，ans直接赋为True而不会去调用dp(i+1,j)，所以这个算法中，pattern是优先匹配`.*`后面的字符，所以在这个算法里面`.*`的问题被很好的解决了。
+
+*Bottom-Up Variation*
+
+```python
+class Solution(object):
+    def isMatch(self, text, pattern):
+        dp = [[False] * (len(pattern) + 1) for _ in range(len(text) + 1)]
+
+        dp[-1][-1] = True
+        for i in range(len(text), -1, -1):
+            for j in range(len(pattern) - 1, -1, -1):
+                first_match = i < len(text) and pattern[j] in {text[i], '.'}
+                if j+1 < len(pattern) and pattern[j+1] == '*':
+                    dp[i][j] = dp[i][j+2] or first_match and dp[i+1][j]
+                else:
+                    dp[i][j] = first_match and dp[i+1][j+1]
+
+        return dp[0][0]
+```
+
+> 这个可能是我最初预想的算法的完成态吧，只是无论是是否实现包括实现的形式，都远远不如这段代码吧。
