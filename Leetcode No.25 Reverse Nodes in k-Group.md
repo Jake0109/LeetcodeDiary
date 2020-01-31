@@ -123,5 +123,79 @@ class Solution:
         return head
 ```
 
-目前写成这样已经花了快3个小时了，虽然没有正确写出来。~~等等我不是暴力解法做出来了吗~~。手上还有点别的事情要做，~~就是你懒了~~，我们明天继续
+目前写成这样已经花了快3个小时了，虽然没有正确写出来。~~等等我不是暴力解法做出来了吗~~。手上还有点别的事情要做，~~就是你懒了~~，我们明天继续。
+
+大家早上好，今天总算是把这个做完了。没有用上面的，直接重新按照思路写了一遍。
+
+```python
+class Solution:
+    def reverseKGroup(self,head: ListNode,k:int):
+        pos_nodes = []
+        count = 1
+        tmp_node = head
+        while tmp_node:
+            if count == k:
+                pos_nodes.append(tmp_node)
+                count = 0
+            count += 1
+            tmp_node = tmp_node.next
+        Pre = pre = None
+        p = head
+        for i in range(len(pos_nodes)):
+            if not Pre:
+                head = pos_nodes[i]
+                Pre = pre = p
+                p = p.next
+                Pre.next = pos_nodes[i].next
+            else:
+                Pre.next = pos_nodes[i]
+                Pre = pre = p
+                p = p.next
+                Pre.next = pos_nodes[i].next
+            for j in range(k-1):
+                tmp = p.next
+                p.next = pre
+                pre = p
+                p = tmp
+        return head
+        
+```
+
+那么我觉得，这个还可以重构一下子：
+
+```python
+class Solution:
+    def reverseKGroup(self,head: ListNode,k:int):
+        pos_nodes = []
+        count = 1
+        tmp_node = head
+        while tmp_node:
+            if count == k:
+                pos_nodes.append(tmp_node)
+                count = 0
+            count += 1
+            tmp_node = tmp_node.next
+        Pre = pre = None
+        p = head
+        for i in range(len(pos_nodes)):
+            if not Pre:
+                head = pos_nodes[i]
+            else:
+                Pre.next = pos_nodes[i]
+            Pre = pre = p
+            p = p.next
+            Pre.next = pos_nodes[i].next
+            for j in range(k-1):
+                tmp = p.next
+                p.next = pre
+                pre = p
+                p = tmp
+        return head
+```
+
+嗯，更简洁了，总算是把这个做好了。
+
+## Reflection & Polishing-up
+
+这个hard的链表题比上一个难多了...~~就是你太菜~~总之花了我两天的时间，虽然昨天已经暴力解出来了，但是，我做这套题目的目的就是为了增加对数据结构和算法的理解，通过实践增长知识，如果一味想着“逃课”那就没有意义了，有这个时间看看日剧它不香吗（笑。这个没有Official Solution，discussion区里面的python大多没有我的代码快，这就不贴出来了。
 
