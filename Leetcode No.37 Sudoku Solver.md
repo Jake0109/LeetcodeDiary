@@ -176,3 +176,172 @@ def solvesudoku(board):
 
 写成这样了以后...我懵了，明天继续。
 
+今天重构了一下这一段代码，现在大概是这个样子的：
+
+```python
+class Solution:
+    def solveSudoku(self,board):
+        def is_valid(data,row,column):
+            data = str(data)
+            for i in range(9):
+                if board[i][column] == data:
+                    return False
+                if board[row][i] == data:
+                    return False
+            
+            sub_row = row // 3 * 3
+            sub_column = column //3 * 3
+            for i in range(sub_row,sub_row+3):
+                for j in range(sub_column,sub_column+3):
+                    if board[i][j] == data:
+                        return False
+            return True
+
+        def traceback(index):
+            row = empty_cells[index][0]
+            column = empty_cells[index][1]
+            for num in range(1,10):
+                if is_valid(num,row,column):
+                    board[row][column] = str(num)
+                    index += 1
+                    
+                    pass
+                    
+                    board[row][column] = '.'
+                    index -= 1
+        
+        empty_cells = []
+        for i,line in enumerate(board):
+            for j,element in enumerate(line):
+                if element == '.':
+                    empty_cells.append([i,j])
+        
+        traceback(0)
+```
+
+一个是没有测试，另外，中间那个大大的pass，当然是没做好的。
+
+```python
+class Solution:
+    def solveSudoku(self,board):
+        def is_valid(data,row,column):
+            data = str(data)
+            for i in range(9):
+                if board[i][column] == data:
+                    return False
+                if board[row][i] == data:
+                    return False
+
+            sub_row = row // 3 * 3
+            sub_column = column //3 * 3
+            for i in range(sub_row,sub_row+3):
+                for j in range(sub_column,sub_column+3):
+                    if board[i][j] == data:
+                        return False
+            return True
+
+        def traceback(index):
+            row = empty_cells[index][0]
+            column = empty_cells[index][1]
+            for num in range(1,10):
+                if is_valid(num,row,column):
+                    board[row][column] = str(num)
+
+                    if index == len(empty_cells) - 1:
+                        self.flag = 1
+                        return
+                    if index < len(empty_cells) - 1:
+                        traceback(index + 1)
+                        
+                    if self.flag == 0:
+                        board[row][column] = '.'
+
+        empty_cells = []
+        for i,line in enumerate(board):
+            for j,element in enumerate(line):
+                if element == '.':
+                    empty_cells.append([i,j])
+
+        self.flag = 0
+        traceback(0)
+```
+
+我决定把中间那段整合成这样：
+
+```python
+        def traceback(index):
+            row = empty_cells[index][0]
+            column = empty_cells[index][1]
+            for num in range(1,10):
+                if is_valid(num,row,column):
+                    board[row][column] = str(num)
+
+                    if index == len(empty_cells) - 1:
+                        self.flag = 1
+                        return
+                    if index < len(empty_cells) - 1:
+                        traceback(index + 1)
+                        
+                    if self.flag == 0:
+                        board[row][column] = '.'
+```
+
+因为我认为没有必要再函数里面就改变index的值，不如将index+1作为参数传递给递归函数。
+
+
+
+## Reflection & Polishing-up
+
+好像这一篇的篇幅比较大，虽然大多数都是错的...但是总归是做出来了。虽然参考了别人的，但是一个本来就不怎么会玩数独的人，写了个东西自动化搞数独，不也是挺浪漫的吗。~~话说今天情人节，大家过得怎么样啊>.<~~还是多去看看别人是怎么写的吧。听说还是有不少更优的解法的。
+
+一个用set的解法：
+
+```python
+class Solution:
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        row = [set(range(1, 10)) for _ in range(9)]  # 行剩余可用数字
+        col = [set(range(1, 10)) for _ in range(9)]  # 列剩余可用数字
+        block = [set(range(1, 10)) for _ in range(9)]  # 块剩余可用数字
+
+        empty = []  # 收集需填数位置
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] != '.':  # 更新可用数字
+                    val = int(board[i][j])
+                    row[i].remove(val)
+                    col[j].remove(val)
+                    block[(i // 3)*3 + j // 3].remove(val)
+                else:
+                    empty.append((i, j))
+
+        def backtrack(iter=0):
+            if iter == len(empty):  # 处理完empty代表找到了答案
+                return True
+            i, j = empty[iter]
+            b = (i // 3)*3 + j // 3
+            for val in row[i] & col[j] & block[b]:
+                row[i].remove(val)
+                col[j].remove(val)
+                block[b].remove(val)
+                board[i][j] = str(val)
+                if backtrack(iter+1):
+                    return True
+                row[i].add(val)  # 回溯
+                col[j].add(val)
+                block[b].add(val)
+            return False
+        backtrack()
+```
+
+看完发现，丢人了...回溯的英文是backtrack不是traceback...妈耶...
+
+- `for val in row[i] & col[j] & block[b]:`还能有这种用法...我都是分开来写三个in。
+- 这里将block这个线性化了，不像我的代码里，是`cell[0][0]cell[0][1]...`这个样子的，确实也非常方便。
+
+最初我看到的solution跟这个差不多，所以一开始我的solution跟这个有点像，都是用set的。但是毕竟不懂回溯，也没理清思路，所以写不出来。现在看的话，清晰很多。
+
+## Conclusion
+
+- 学会多种渠道获取信息，在上一个模块中给大家display的solution显然不是官方的leetcode的discussion里面的，是leetcode国内讨论区里面的，兼听则明。
+- 英语还是要继续学，backtrack之类的...对名命有很大的帮助，从而对写出易于理解的代码也有很大帮助。
+- 最近看了看python的PEP 8，还在继续阅读中，代码规范非常重要，我觉得我重构的代码就比一开始写的要好，从结构上来说。想我这种没怎么搞过项目的，代码规范可能会成为减分项，所以现在查漏补缺吧。
