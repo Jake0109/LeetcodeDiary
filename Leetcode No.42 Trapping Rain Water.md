@@ -139,13 +139,39 @@ class Solution:
         return result
 ```
 
-这个感觉是做到目前为止最吃力的一个，可能我stack本来就用的不是很好，一旦遇到比较复杂的情况，可能脑子就会转不过来吧><。后面的 Two Pointer 是最快的，但是今天已经花了将近两个小时的时间了，明天再继续，这题是第一个让我花了3天研究的题目啊...
+这个感觉是做到目前为止最吃力的一个，可能我stack本来就用的不是很好，一旦遇到比较复杂的情况，可能脑子就会转不过来吧><。
 
 ### Two Pointer
 
 ```python
+class Solution:
+	def trap_two_pointer(self,heights):
+        if not heights:
+            return 0
 
+        res = 0
+        left_max = 0
+        right_max = 0
+
+        left = 0
+        right = len(heights) - 1
+        while left < right:
+            left_max = max(left_max, heights[left])
+            right_max = max(right_max,heights[right])
+
+            if left_max < right_max:
+                res += left_max - heights[left]
+                left += 1
+                else:
+                    res += right_max - heights[right]
+                    right -= 1
+
+                    return res
 ```
+
+这个要跟DP的approach相比，在dp的方案中，总共需要遍历三次数组/列表，但是Two Pointer中，只需要遍历一次，高下立判。而且如果跟stack的方案比起来，也没有那么多入栈出栈操作。
 
 ## Conclusion
 
+- 钻研任何一个值得钻研的题目，就算它可能花费时间，并且在短时间并不能给我带来太大的利益，但是如果永远不这么做，我就只能缓慢的进步，甚至原地踏步。
+- 我不会说因为我痛苦，所以感受到了成就，但是每一次必须借鉴他人的不甘，都会是我前进的动力。
