@@ -85,3 +85,79 @@ class Solution:
 但是也超时了...
 
 所以我决定去看看官方的题解，发现了不少别的解法，我明天全部实现一次然后再更新吧。
+
+## Reflection & Polishing-up
+
+对于O(n^3)的一种改进方法：
+
+```python
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+
+        res = 0
+
+        for i in range(len(heights)):
+            Min = heights[i]
+            for j in range(i,len(heights)):
+                Min = min(Min,heights[j])
+                res = max(res,(j-i+1)*Min)
+
+        return res
+```
+
+变为O(n^2)的解法。
+
+然后是分治法：
+
+```python
+
+        def calculate(start,end):
+            print(start,end)
+            if start == end:
+                return heights[start]
+
+            Min = min(heights[start:end+1])
+            index = heights.index(Min,start)
+            largest = (end-start+1)*Min
+
+            if index == start:
+                return max(largest,calculate(start+1,end))
+
+            if index == end:
+                return max(largest,calculate(start,end-1))
+
+            if end == start+1:
+                return max(heights[start],heights[end],Min*2)
+
+            return max(largest,calculate(start,index-1),calculate(index+1,end))
+
+        if not heights:
+            return 0
+
+        return calculate(0,len(heights)-1)
+```
+
+超过时间限制的数据是30k个1。
+
+但是官方给的分治法写的比我自己写得好
+
+```java
+public class Solution {
+    public int calculateArea(int[] heights, int start, int end) {
+        if (start > end)
+            return 0;
+        int minindex = start;
+        for (int i = start; i <= end; i++)
+            if (heights[minindex] > heights[i])
+                minindex = i;
+        return Math.max(heights[minindex] * (end - start + 1), Math.max(calculateArea(heights, start, minindex - 1), calculateArea(heights, minindex + 1, end)));
+    }
+    public int largestRectangleArea(int[] heights) {
+        return calculateArea(heights, 0, heights.length - 1);
+    }
+}
+```
+
+虽然是Java，但是看懂应该是没有问题的。
+
+最后一个是栈的解决方案，但是说实话，乍一眼我是没看懂的，还需要再思考思考，理解理解。
