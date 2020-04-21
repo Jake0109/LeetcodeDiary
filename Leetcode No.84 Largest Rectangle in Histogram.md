@@ -161,3 +161,35 @@ public class Solution {
 虽然是Java，但是看懂应该是没有问题的。
 
 最后一个是栈的解决方案，但是说实话，乍一眼我是没看懂的，还需要再思考思考，理解理解。
+
+其实还是依葫芦画瓢写出来的：
+
+```python
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+
+        stack = []
+
+        stack.append(-1)
+
+        maxArea = 0
+
+        for i, height in enumerate(heights):
+            while stack[-1] != -1 and height < heights[stack[-1]]:
+                h = stack.pop()
+                maxArea = max(maxArea,(i-stack[-1]-1)*heights[h])
+            stack.append(i)
+
+        while stack[-1] != -1:
+            h = stack.pop()
+            maxArea = max(maxArea,heights[h]*(len(heights) - stack[-1] - 1))
+
+        return maxArea
+```
+
+说实话，还是有点不能理解的部分在得，好在下一题好像也是类似的题目，到时候再理解一下
+
+## Conclusion
+
+- 这两天几乎一天都不在家里面，所以不怎么能碰到电脑，所以托更了，如果影响到各位的体验了，在这里说一声对不起。
+- 现在工作真难找啊，毕设还有前端没做，真的是要死了。
