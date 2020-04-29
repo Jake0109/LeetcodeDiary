@@ -110,4 +110,34 @@ class Solution:
         return rec(s1, s2)
 ```
 
-这样的话，我觉得就能完成目标了，但是，时间复杂度过高，会超时。我明天再看看。
+这样的话，我觉得就能完成目标了，但是，时间复杂度过高，会超时。参考了一下别人的算法：
+
+```python
+class Solution:
+    def isScramble(self, s1: str, s2: str) -> bool:
+        def rec(s1, s2):
+            # print(f"s1:{s1} s2:{s2}")
+            # if there is letters in s1 and not in s2 return False
+            t1 = sorted(s1)
+            t2 = sorted(s2)
+            if t1 != t2:
+                return False
+            
+            length = len(s1)
+            if length <= 2:
+                return s1 == s2 or s1 == s2[::-1]
+
+            for i in range(1,length):
+                ans = rec(s1[:i],s2[:i]) and rec(s1[i:],s2[i:]) or rec(s1[:i],s2[length-i:]) and rec(s1[i:],s2[:length-i])
+                if ans:
+                    return True
+            return False
+
+        return rec(s1, s2)
+```
+
+添加了这么一个步骤以后，就可以避免很多不必要的步骤，效率也可以高很多。
+
+## Reflection & Polishing-up
+
+这部分明天再写吧，我看到了用DP的思路了，但是今天光是想递归的算法就已经头疼脑袋大了。
