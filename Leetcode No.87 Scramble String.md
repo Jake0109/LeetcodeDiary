@@ -116,7 +116,6 @@ class Solution:
 class Solution:
     def isScramble(self, s1: str, s2: str) -> bool:
         def rec(s1, s2):
-            # print(f"s1:{s1} s2:{s2}")
             # if there is letters in s1 and not in s2 return False
             t1 = sorted(s1)
             t2 = sorted(s2)
@@ -141,3 +140,69 @@ class Solution:
 ## Reflection & Polishing-up
 
 这部分明天再写吧，我看到了用DP的思路了，但是今天光是想递归的算法就已经头疼脑袋大了。
+
+评论区里面真的都是人才啊，稍微看了几个就真的从内心深处这么觉得了，先看一个DP的：
+
+```python
+class Solution:
+    def isScramble(self, s1: str, s2: str) -> bool:
+        if len(s1)!=len(s2):
+            return False
+        if s1==s2:
+            return True
+        dp=[[[False]*(len(s1)+1)  for j in range(len(s1))] for i in range(len(s1))]
+        for k in range(1,len(s1)+1):
+            for i in range(len(s1)):
+                for j in range(len(s1)):
+                    if k==1:
+                        dp[i][j][k]=s1[i]==s2[j]
+                        continue
+                    for h in range(1,k):
+                        left=(dp[i][j][h] and dp[i+h][j+h][k-h]) if j+h<len(s1) and i+h<len(s1) else False
+                        right=(dp[i][j+k-h][h] and dp[i+h][j][k-h]) if j+k-h<len(s1) and i+h<len(s1) else False
+                        dp[i][j][k]=dp[i][j][k] or left or right
+        return dp[0][0][len(s1)]
+```
+
+说实话，人看傻了...三维矩阵，这个DP可能更好理解一点：
+
+```python
+def isScramble(self, s1, s2):
+    dp = {}
+    
+    def helper(s1, s2):
+        if (s1, s2) in dp:
+            return dp[(s1, s2)]
+        if len(s1)==1:
+            return s1==s2
+        if len(s1) != len(s2) or sorted(s1)!= sorted(s2):
+            return False
+        for i in range (1,len(s1)):
+            if helper(s1[:i], s2[:i]) and helper(s1[i:] , s2[i:]) or helper(s1[:i], s2[-i:]) and helper(s1[i:], s2[:-i]):
+                dp[(s1,s2)] = True
+                return True
+        dp[(s1,s2)] = False
+        return False
+    
+    return helper(s1, s2)
+```
+
+但说是DP，其实本质上是带memo的递归，所以可能纯的DP的话，还需要看上面那个。
+
+然后就是一个三行代码的递归Solution：
+
+```python
+def isScramble(self, s1: str, s2: str) -> bool:
+        if s1==s2:return 1
+        if sorted(s1)!=sorted(s2): return 0
+        return any(self.isScramble(s1[:i],s2[:i]) and self.isScramble(s1[i:],s2[i:]) or
+                   self.isScramble(s1[:i],s2[-i:]) and self.isScramble(s1[i:],s2[:-i]) 
+                   for i in range(1,len(s1)))
+```
+
+嗯...真的是人才，any()函数用的非常到位，之前我没想到。
+
+## Conclusion
+
+- 学到的一点是，在Python的切片操作中，可以使用list[-i:]这样的操作。
+- 以后如果再遇到递归的题目，可以试试直接递归题目给的函数。
